@@ -1,6 +1,6 @@
 {
     "name": "aliu-zhongzheng/laravel-compat",
-    "description": "Laravel version compatibility scanner",
+    "description": "Static compatibility audit for legacy Laravel/PHP projects: PHPCompatibility findings aggregated into a human-readable report.",
     "type": "library",
     "license": "MIT",
     "bin": [
