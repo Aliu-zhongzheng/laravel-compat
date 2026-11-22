@@ -45,14 +45,14 @@ that owns the project's `vendor/`.
 See [docs/sample-report.md](docs/sample-report.md) for a real, sanitized
 report run. A small excerpt of the Markdown table:
 
-| # | File:Line | Type | Rule | Finding |
+| # | 文件:行 | 类型 | 规则 | 检测到的问题 |
 | --- | --- | --- | --- | --- |
 | 1 | `app/Http/Controllers/Admin/System/DictController.php:84` | WARNING | `PHPCompatibility.ParameterValues.RemovedImplodeFlexibleParamOrder.Deprecated` | Passing the $glue and $pieces parameters in reverse order to implode has been deprecated since PHP 7.4; $glue should be the first parameter and $pieces the second |
 | 2 | `app/Http/Controllers/Admin/System/DictController.php:113` | WARNING | `PHPCompatibility.ParameterValues.RemovedImplodeFlexibleParamOrder.Deprecated` | Passing the $glue and $pieces parameters in reverse order to implode has been deprecated since PHP 7.4; $glue should be the first parameter and $pieces the second |
 | 3 | `routes/console.php:18` | WARNING | `PHPCompatibility.FunctionDeclarations.NewClosure.ThisFoundOutsideClass` | Closures / anonymous functions only have access to $this if used within a class or when bound to an object using bindTo(). Please verify. |
 
-The report body is Chinese by design. Rule names and messages are passed
-through unchanged from PHPCompatibility.
+The table headers and the report body are Chinese by design; rule names and
+messages are passed through unchanged from PHPCompatibility.
 
 Honest disclosures:
 
