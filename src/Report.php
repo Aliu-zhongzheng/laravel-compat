@@ -39,6 +39,19 @@ final class Report
         $lines[] = '- 生成时间：' . $generatedAt;
         $lines[] = '- 覆盖范围说明：框架层（Laravel 各版本移除的门面/方法/配置项）未覆盖，本报告只反映 PHP 语言层检测结果。';
 
+        // Known-tool-blind-spot marker (conditional)
+        $hasConsoleThisFalsePositive = false;
+        foreach ($messages as $m) {
+            if ($m['source'] === 'PHPCompatibility.FunctionDeclarations.NewClosure.ThisFoundOutsideClass'
+                && str_contains(self::rel($target, $m['file']), 'routes/console.php')) {
+                $hasConsoleThisFalsePositive = true;
+                break;
+            }
+        }
+        if ($hasConsoleThisFalsePositive) {
+            $lines[] = '- 已知工具盲区：`routes/console.php` 中的闭包 `$this` 由 Laravel 的 `Artisan::command` 绑定，静态检查无法识别，此条属误报。';
+        }
+
         if ($count === 0) {
             $lines[] = '';
             $lines[] = '未检测到与 PHP ' . $phpVersion . ' 不兼容的写法。注意：本报告只覆盖 PHP 语言层，框架层未覆盖。';

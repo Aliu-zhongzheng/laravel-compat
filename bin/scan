@@ -42,7 +42,7 @@ $cmd = [
     '--extensions=php',
     '--runtime-set', 'testVersion', $phpVersion,
     '--runtime-set', 'installed_paths', $stdPath,
-    '--ignore=vendor/*,node_modules/*,storage/*,*.blade.php',
+    '--ignore=vendor/*,node_modules/*,storage/*,bootstrap/cache/*,*_ide_helper*.php,*.blade.php',
     '--report=json',
     '--report-file=' . $jsonFile,
     '--no-colors',
