@@ -22,7 +22,7 @@ untested against the bundled PHPCompatibility 9.x ruleset.
 ## Install
 
 ```
-composer require laravel-compat/laravel-compat
+composer require aliu-zhongzheng/laravel-compat
 ```
 
 ## Usage
