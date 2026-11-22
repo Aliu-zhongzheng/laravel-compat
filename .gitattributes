@@ -1,0 +1,4 @@
+* text=auto
+bin/scan text eol=lf
+*.md text eol=lf
+*.php text eol=lf
