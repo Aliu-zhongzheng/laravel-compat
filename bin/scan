@@ -1,0 +1,84 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+$autoload = $GLOBALS['_composer_autoload_path'] ?? (__DIR__ . '/../vendor/autoload.php');
+if (!is_file($autoload)) {
+    fwrite(STDERR, "vendor/autoload.php not found. Run: composer install\n");
+    exit(1);
+}
+require $autoload;
+
+$args = array_slice($_SERVER['argv'], 1);
+$phpVersion = '8.0';
+$target = null;
+foreach ($args as $arg) {
+    if (str_starts_with($arg, '--php=')) { $phpVersion = substr($arg, 6); continue; }
+    if (str_starts_with($arg, '-')) { fwrite(STDERR, "unknown option: {$arg}\n"); exit(1); }
+    $target = $arg;
+}
+if ($target === null) { fwrite(STDERR, "usage: scan <path> [--php=8.0]\n"); exit(1); }
+$real = realpath($target);
+if ($real === false || !is_dir($real)) { fwrite(STDERR, "not a directory: {$target}\n"); exit(1); }
+
+$projectRoot = dirname($autoload, 2);
+$binDir      = $GLOBALS['_composer_bin_dir'] ?? ($projectRoot . '/vendor/bin');
+$phpcs       = $binDir . '/phpcs';
+$stdPath     = $projectRoot . '/vendor/phpcompatibility/php-compatibility';
+
+$buildDir   = $projectRoot . '/build';
+$jsonFile   = $buildDir . '/phpcs.json';
+
+if (!is_file($phpcs)) { fwrite(STDERR, "phpcs not found at {$phpcs}\n"); exit(2); }
+if (!is_dir($stdPath)) { fwrite(STDERR, "PHPCompatibility standard not found: {$stdPath}\n"); exit(2); }
+if (!is_dir($buildDir) && !mkdir($buildDir, 0777, true) && !is_dir($buildDir)) {
+    fwrite(STDERR, "cannot create build dir\n"); exit(2);
+}
+
+$cmd = [
+    PHP_BINARY, $phpcs,
+    '--standard=PHPCompatibility',
+    '--extensions=php',
+    '--runtime-set', 'testVersion', $phpVersion,
+    '--runtime-set', 'installed_paths', $stdPath,
+    '--ignore=vendor/*,node_modules/*,storage/*,*.blade.php',
+    '--report=json',
+    '--report-file=' . $jsonFile,
+    '--no-colors',
+    $real,
+];
+
+$proc = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+if (!is_resource($proc)) { fwrite(STDERR, "failed to start phpcs\n"); exit(2); }
+$out = stream_get_contents($pipes[1]);
+$err = stream_get_contents($pipes[2]);
+fclose($pipes[1]); fclose($pipes[2]);
+$code = proc_close($proc);
+
+// phpcs: 0 = 无问题, 1 = 有问题, 2 = 有问题且可自动修复, >=3 = 处理错误
+if ($code >= 2) { fwrite(STDERR, "phpcs failed (exit {$code})\n" . trim($out) . "\n" . trim($err) . "\n"); exit(2); }
+
+$json = json_decode((string) @file_get_contents($jsonFile), true);
+if (!is_array($json) || !isset($json['totals'])) {
+    fwrite(STDERR, "phpcs did not produce a readable JSON report\n"); exit(2);
+}
+
+$t = $json['totals'];
+
+$reportFile = $buildDir . '/report.md';
+$md = \LaravelCompat\Report::render(
+    $json,
+    $real,
+    $phpVersion,
+    (new \DateTimeImmutable('now', new \DateTimeZone('Asia/Shanghai')))->format('Y-m-d H:i')
+);
+if (@file_put_contents($reportFile, $md) === false) {
+    fwrite(STDERR, "cannot write {$reportFile}\n"); exit(2);
+}
+
+fwrite(STDOUT, sprintf(
+    "scan complete: %d file(s) checked, %d error(s), %d warning(s)\n  json: %s\n  md  : %s\n",
+    count($json['files'] ?? []), (int) $t['errors'], (int) $t['warnings'],
+    $jsonFile, $reportFile
+));
+exit(0);
