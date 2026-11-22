@@ -21,10 +21,11 @@ if ($target === null) { fwrite(STDERR, "usage: scan <path> [--php=8.0]\n"); exit
 $real = realpath($target);
 if ($real === false || !is_dir($real)) { fwrite(STDERR, "not a directory: {$target}\n"); exit(1); }
 
-$projectRoot = dirname($autoload, 2);
-$binDir      = $GLOBALS['_composer_bin_dir'] ?? ($projectRoot . '/vendor/bin');
-$phpcs       = $binDir . '/phpcs';
-$stdPath     = $projectRoot . '/vendor/phpcompatibility/php-compatibility';
+$autoloadReal = (string) realpath($autoload);
+$projectRoot  = dirname($autoloadReal, 2);
+$binDir       = $GLOBALS['_composer_bin_dir'] ?? ($projectRoot . '/vendor/bin');
+$phpcs        = $binDir . '/phpcs';
+$stdPath      = $projectRoot . '/vendor/phpcompatibility/php-compatibility';
 
 $buildDir   = $projectRoot . '/build';
 $jsonFile   = $buildDir . '/phpcs.json';
