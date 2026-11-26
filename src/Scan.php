@@ -6,5 +6,5 @@ namespace LaravelCompat;
 final class Scan
 {
     public const NAME = 'laravel-compat';
-    public const VERSION = '0.1.0';
+    public const VERSION = '0.1.2';
 }
