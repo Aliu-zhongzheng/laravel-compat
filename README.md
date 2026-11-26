@@ -4,6 +4,8 @@ Static compatibility audit for legacy Laravel/PHP projects. Point it at a
 project directory, get a `build/report.md` you can hand to a client and a
 `build/phpcs.json` you can feed to other tools.
 
+If you are looking for how to find PHP 8 incompatible code in an old Laravel project — deprecated or removed functions, reversed `implode()` arguments, PHP 4 style constructors — this is a static scan for exactly that layer: one command over your source, PHPCompatibility rules aggregated into a single Markdown report. It is not a full upgrade checker: Laravel framework removals (facades, methods, config keys) are out of scope, and the report says so in every output.
+
 ## What it does / what it does not
 
 - does: runs PHPCompatibility via PHP_CodeSniffer over your source,
